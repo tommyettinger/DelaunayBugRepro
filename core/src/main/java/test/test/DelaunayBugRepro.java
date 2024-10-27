@@ -3,11 +3,14 @@ package test.test;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Colors;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.DelaunayTriangulator;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ShortArray;
+import com.badlogic.gdx.utils.TimeUtils;
 
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
@@ -19,7 +22,13 @@ public class DelaunayBugRepro extends ApplicationAdapter {
     FloatArray points = new FloatArray();
     ShortArray triangles;
 
+    Array<Color> colors;
+
+    long startTime;
+
     public void create () {
+        startTime = TimeUtils.millis();
+        colors = Colors.getColors().values().toArray();
         shape = new ShapeRenderer();
 
         //bad hexagon:
@@ -64,8 +73,10 @@ public class DelaunayBugRepro extends ApplicationAdapter {
             shape.circle(x, y, 3);
         }
 
+        int seconds = (int)(TimeUtils.timeSinceMillis(startTime) / 1000L);
+
         //draw triangles
-        for (int i = 0; i < triangles.size; i += 3) {
+        for (int i = (seconds * 3) % (triangles.size - 3), c = 1; i < triangles.size; i += 3, c++) {
             int p1 = triangles.get(i) * 2;
             int p2 = triangles.get(i + 1) * 2;
             int p3 = triangles.get(i + 2) * 2;
@@ -74,7 +85,9 @@ public class DelaunayBugRepro extends ApplicationAdapter {
             float x2 = points.get(p2), y2 = points.get(p2 + 1);
             float x3 = points.get(p3), y3 = points.get(p3 + 1);
 
+//            shape.setColor(colors.get(c % colors.size));
             shape.triangle(x1, y1, x2, y2, x3, y3);
+            break;
         }
 
         shape.end();
