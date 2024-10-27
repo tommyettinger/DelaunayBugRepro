@@ -3,6 +3,7 @@ package test.test.lwjgl3;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import test.test.DelaunayBugRepro;
+import test.test.DoubleDelaunayBugRepro;
 
 /** Launches the desktop (LWJGL3) application. */
 public class Lwjgl3Launcher {
@@ -12,7 +13,7 @@ public class Lwjgl3Launcher {
     }
 
     private static Lwjgl3Application createApplication() {
-        return new Lwjgl3Application(new DelaunayBugRepro(), getDefaultConfiguration());
+        return new Lwjgl3Application(new DoubleDelaunayBugRepro(), getDefaultConfiguration());
     }
 
     private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {
