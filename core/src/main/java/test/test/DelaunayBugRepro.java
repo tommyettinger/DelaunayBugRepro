@@ -36,6 +36,17 @@ public class DelaunayBugRepro extends ApplicationAdapter {
         points.add(882.0813f,819.3633f);
         points.add(482.10352f,819.4784f);
 
+
+        /*
+        //good hexagon: same shape and ratio, but shifted in space (translated)
+        points.add(287.99274f, 475.00427f);
+        points.add(487.97058f, 128.60693f);
+        points.add(887.9485f, 128.5686f);
+        points.add(1087.9927f, 474.9276f);
+        points.add(888.0813f, 821.3633f);
+        points.add(488.10352f, 821.4784f);
+        */
+
         triangles = delaunay.computeTriangles(points, false);
     }
 
