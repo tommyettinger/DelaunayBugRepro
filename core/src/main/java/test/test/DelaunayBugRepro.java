@@ -7,10 +7,8 @@ import com.badlogic.gdx.graphics.Colors;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.DelaunayTriangulator;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.FloatArray;
-import com.badlogic.gdx.utils.ShortArray;
-import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.*;
 
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
@@ -20,13 +18,15 @@ public class DelaunayBugRepro extends ApplicationAdapter {
 
     DelaunayTriangulator delaunay = new DelaunayTriangulator();
     FloatArray points = new FloatArray();
-    ShortArray triangles;
+    ShortArray triangles, tempTriangles;
 
     Array<Color> colors;
 
     long startTime;
+    int goodLength;
 
     public void create () {
+        MathUtils.random.setSeed(12345);
         startTime = TimeUtils.millis();
         colors = Colors.getColors().values().toArray();
         shape = new ShapeRenderer();
@@ -57,9 +57,26 @@ public class DelaunayBugRepro extends ApplicationAdapter {
         */
 
         triangles = delaunay.computeTriangles(points, false);
+        tempTriangles = new ShortArray(triangles);
+        goodLength = triangles.size;
     }
 
     public void render () {
+
+//        if(goodLength == tempTriangles.size) {
+            int idx = MathUtils.random(11);
+            // randomly moves a point up or down
+            points.set(idx, Math.nextAfter(points.get(idx), MathUtils.randomSign() / 0f));
+            tempTriangles = delaunay.computeTriangles(points, false);
+            if(tempTriangles.size != goodLength){
+                triangles = tempTriangles;
+                for (int i = 0; i < 6; i++) {
+                    System.out.println("points.add("+points.get(i<<1) +"f,"+points.get(i<<1|1) +"f);");
+                }
+                System.out.println();
+            }
+//        }
+
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // your code here
@@ -75,8 +92,8 @@ public class DelaunayBugRepro extends ApplicationAdapter {
 
         int seconds = (int)(TimeUtils.timeSinceMillis(startTime) / 1000L);
 
-        //draw triangles
-        for (int i = (seconds * 3) % (triangles.size - 3), c = 1; i < triangles.size; i += 3, c++) {
+        //draw all triangles
+        for (int i = 0, c = 1; i < triangles.size; i += 3, c++) {
             int p1 = triangles.get(i) * 2;
             int p2 = triangles.get(i + 1) * 2;
             int p3 = triangles.get(i + 2) * 2;
@@ -85,10 +102,24 @@ public class DelaunayBugRepro extends ApplicationAdapter {
             float x2 = points.get(p2), y2 = points.get(p2 + 1);
             float x3 = points.get(p3), y3 = points.get(p3 + 1);
 
-//            shape.setColor(colors.get(c % colors.size));
+            shape.setColor(colors.get(c % colors.size));
             shape.triangle(x1, y1, x2, y2, x3, y3);
-            break;
         }
+//
+//        //draw a different triangle per second
+//        for (int i = (seconds * 3) % (triangles.size - 3), c = 1; i < triangles.size; i += 3, c++) {
+//            int p1 = triangles.get(i) * 2;
+//            int p2 = triangles.get(i + 1) * 2;
+//            int p3 = triangles.get(i + 2) * 2;
+//
+//            float x1 = points.get(p1), y1 = points.get(p1 + 1);
+//            float x2 = points.get(p2), y2 = points.get(p2 + 1);
+//            float x3 = points.get(p3), y3 = points.get(p3 + 1);
+//
+////            shape.setColor(colors.get(c % colors.size));
+//            shape.triangle(x1, y1, x2, y2, x3, y3);
+//            break;
+//        }
 
         shape.end();
     }
