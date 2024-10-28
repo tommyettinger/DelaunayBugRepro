@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Colors;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.DelaunayTriangulator;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.*;
 
 
@@ -18,25 +19,27 @@ public class DoubleDelaunayBugRepro extends ApplicationAdapter {
 
     DoubleDelaunayTriangulator delaunay = new DoubleDelaunayTriangulator();
     double[] points;
-    IntArray triangles;
+    IntArray triangles, tempTriangles;
 
     Array<Color> colors;
 
     long startTime;
+    int goodLength;
 
     public void create () {
+        MathUtils.random.setSeed(12345);
         startTime = TimeUtils.millis();
         colors = Colors.getColors().values().toArray();
         shape = new ShapeRenderer();
 
         //bad hexagon:
         points = new double[]{
-             281.99274,473.00427,
-             481.97058,126.60693,
-             881.9485,126.5686,
-             1081.9927,472.9276,
-             882.0813,819.3633,
-             482.10352,819.4784
+            0x1.19fe2435696e6p8,  0x1.d90117d6b65aap8,  // 281.99274,473.00427,
+            0x1.e1f877ee4e26dp8,  0x1.fa463f141205dp6,  // 481.97058,126.60693,
+            0x1.b90a6809d4951p9,  0x1.fa463f141205bp6,  // 881.9485,126.5686,
+            0x1.0e7f886594af5p10, 0x1.d90117d6b65a8p8,  // 1081.9927,472.9276,
+            0x1.b90a6809d4953p9,  0x1.99ae809d49518p9,  // 882.0813,819.3633,
+            0x1.e1f877ee4e26fp8,  0x1.99ae809d4951ap9,   // 482.10352,819.4784
         };
 
         /*
@@ -50,9 +53,26 @@ public class DoubleDelaunayBugRepro extends ApplicationAdapter {
         */
 
         triangles = delaunay.computeTriangles(points, false);
+        tempTriangles = new IntArray(triangles);
+        goodLength = triangles.size;
     }
 
     public void render () {
+
+        if(goodLength == tempTriangles.size) {
+            int idx = MathUtils.random(11);
+            // randomly moves a point up or down
+            points[idx] = Math.nextAfter(points[idx], MathUtils.randomSign() / 0.0);
+            tempTriangles = delaunay.computeTriangles(points, false);
+            if(tempTriangles.size != goodLength){
+                triangles = tempTriangles;
+                for (int i = 0; i < 6; i++) {
+                    System.out.println(points[i<<1] +", "+points[i<<1|1]);
+                }
+                System.out.println();
+            }
+        }
+
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // your code here
