@@ -51,6 +51,11 @@ public class DoubleDelaunayTriangulator {
     private final double[] superTriangle = new double[6];
 
     /** @see #computeTriangles(double[], int, int, boolean) */
+    public IntArray computeTriangles (DoubleArray points, boolean sorted) {
+        return computeTriangles(points.items, 0, points.size, sorted);
+    }
+
+    /** @see #computeTriangles(double[], int, int, boolean) */
     public IntArray computeTriangles (double[] polygon, boolean sorted) {
         return computeTriangles(polygon, 0, polygon.length, sorted);
     }
